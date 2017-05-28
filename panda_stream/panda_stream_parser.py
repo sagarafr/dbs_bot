@@ -1,5 +1,6 @@
 from html.parser import HTMLParser
 from requests import get
+from requests import Timeout
 from utils.get_last_episode import get_last_episode
 
 
@@ -100,8 +101,11 @@ class PandaStreamParser:
 
     def get_dbs_last_information(self):
         old_information = self.dbs_important_information
-        self.last_dbs_episode = get_last_episode("http://panda-streaming.net/dragon-ball-super-{}-vostfr/", self.last_dbs_episode)
-        response = get("http://panda-streaming.net/dragon-ball-super-{}-vostfr/".format(self.last_dbs_episode))
+        try:
+            self.last_dbs_episode = get_last_episode("http://panda-streaming.net/dragon-ball-super-{}-vostfr/", self.last_dbs_episode)
+            response = get("http://panda-streaming.net/dragon-ball-super-{}-vostfr/".format(self.last_dbs_episode), timeout=1)
+        except Timeout:
+            raise
         if response.status_code == 200:
             self.clear_dbs()
             self.dbs_feed(response.text)

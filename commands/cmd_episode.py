@@ -1,5 +1,6 @@
-from commands import Command
 from requests import get
+from requests.exceptions import Timeout
+from commands import Command
 from main import panda_stream
 
 
@@ -8,7 +9,11 @@ def episode(bot, update, args):
     'List a episode. Use: /episode dbs number'
     if len(args) == 2:
         if str(args[0]).lower() == "dbs":
-            response = get("http://panda-streaming.net/dragon-ball-super-{}-vostfr/".format(args[1]))
+            try:
+                response = get("http://panda-streaming.net/dragon-ball-super-{}-vostfr/".format(args[1]), timeout=1)
+            except Timeout:
+                bot.sendMessage(chat_id=update.message.chat_id, text="Requests timeout")
+                return
             if response.status_code == 200:
                 panda_stream.clear_dbs()
                 panda_stream.dbs_feed(response.text)

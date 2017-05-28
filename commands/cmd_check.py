@@ -1,4 +1,5 @@
 from telegram.ext import Job
+from requests.exceptions import Timeout
 from commands import Command
 from utils.find_job import find_job
 from main import admin_grp
@@ -12,7 +13,11 @@ def check(bot, update, job_queue, args):
     if len(args) == 1:
         if str(args[0]).lower() == "dbs":
             if not find_job(job_queue, "check_dbs_information"):
-                information = panda_stream.get_dbs_last_information()
+                try:
+                    information = panda_stream.get_dbs_last_information()
+                except Timeout:
+                    bot.sendMessage(chat_id=update.message.chat_id, text="Request timeout")
+                    return
                 if information is not None:
                     bot.sendMessage(chat_id=update.message.chat_id, text='\n'.join(information))
                 job_queue.put(Job(callback=check_dbs_information, interval=5 * 60, repeat=True, context=update.message.chat_id))
@@ -26,6 +31,10 @@ def check(bot, update, job_queue, args):
 
 
 def check_dbs_information(bot, job):
-    information = panda_stream.get_dbs_last_information()
+    try:
+        information = panda_stream.get_dbs_last_information()
+    except Timeout:
+        bot.sendMessage(chat_id=job.context, text="Request timeout")
+        return
     if information is not None:
         bot.sendMessage(chat_id=job.context, text='\n'.join(information))
