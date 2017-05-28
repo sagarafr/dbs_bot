@@ -10,14 +10,22 @@ class DragonBallSuperParser(HTMLParser):
         self._blacklist_information = ["Signaler un problème avec une vidéo",
                                        "N'hésitez pas à laisser un commentaire pour partager vos impressions sur cet épisode ou nous aider à tenir le site à jour en cas de problème avec les vidéos.",
                                        "Patience !"]
+        self._episodes_links = []
         self._current_tag = ""
 
     @property
     def important_information(self):
         return self._important_information
 
+    @property
+    def episodes_links(self):
+        return self._episodes_links
+
     def reset_important_information(self):
         self._important_information = []
+
+    def reset_episodes_links(self):
+        self._episodes_links = []
 
     def handle_comment(self, data):
         pass
@@ -43,6 +51,10 @@ class DragonBallSuperParser(HTMLParser):
             for pair in attrs:
                 if pair == ('style', 'color:red;'):
                     self._current_tag = "span"
+        if tag == "iframe":
+            for pair in attrs:
+                if pair[0] == 'src':
+                    self._episodes_links.append(pair[1])
 
     def handle_endtag(self, tag):
         if tag == "span" and self._current_tag == "span":
@@ -75,11 +87,16 @@ class PandaStreamParser:
     def dbs_important_information(self):
         return self._dbs_parser.important_information
 
+    @property
+    def dbs_episodes_links(self):
+        return self._dbs_parser.episodes_links
+
     def dbs_feed(self, text: str):
         self.dbs_parser.feed(text)
 
     def clear_dbs(self):
         self.dbs_parser.reset_important_information()
+        self.dbs_parser.reset_episodes_links()
 
     def get_dbs_last_information(self):
         old_information = self.dbs_important_information
