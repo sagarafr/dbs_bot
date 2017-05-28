@@ -19,6 +19,7 @@ def check(bot, update, job_queue, args):
                     bot.sendMessage(chat_id=update.message.chat_id, text="Request timeout")
                     return
                 if information is not None:
+                    bot.sendMessage(chat_id=update.message.chat_id, text="Information on the episode n°{}".format(panda_stream.last_dbs_episode))
                     bot.sendMessage(chat_id=update.message.chat_id, text='\n'.join(information))
                 job_queue.put(Job(callback=check_dbs_information, interval=5 * 60, repeat=True, context=update.message.chat_id))
                 bot.sendMessage(chat_id=update.message.chat_id, text="Check on {}".format(args[0]))
@@ -37,4 +38,5 @@ def check_dbs_information(bot, job):
         bot.sendMessage(chat_id=job.context, text="Request timeout")
         return
     if information is not None:
+        bot.sendMessage(chat_id=job.context, text="Information on the episode n°{}".format(panda_stream.last_dbs_episode))
         bot.sendMessage(chat_id=job.context, text='\n'.join(information))
