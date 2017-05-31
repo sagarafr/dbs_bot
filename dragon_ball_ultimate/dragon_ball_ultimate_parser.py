@@ -52,6 +52,10 @@ class DragonBallUltimate(HTMLParser):
         self._link = []
         self._article_state = 0
 
+    def reset_data(self):
+        self._article.clear()
+        self._link.clear()
+
     def handle_comment(self, data):
         pass
 
@@ -111,3 +115,8 @@ class DragonBallUltimate(HTMLParser):
             if not cara.isspace():
                 return False
         return True
+
+    # TODO may change this with __deepcopy__
+    def get_deecopy(self):
+        from copy import deepcopy
+        return deepcopy(self._article)
